@@ -2,7 +2,7 @@ import TelegramBot from 'node-telegram-bot-api';
 import NekoBocc from 'nekobocc';
 import express from 'express';
 
-const token = 'YOUR_TELEGRAM_BOT_TOKEN';
+const token = process.env.TOKEN;
 const bot = new TelegramBot(token, { polling: true });
 const nekobocc = new NekoBocc();
 
