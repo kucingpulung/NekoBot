@@ -83,7 +83,7 @@ bot.onText(/\/start/, (msg) => {
 
 bot.onText(/\/help/, (msg) => {
   const chatId = msg.chat.id;
-  const help = `Gunakan perintah berikut:\n/random → hentai acak\n/release → rilisan terbaru\n/search &lt;kata&gt; → cari hentai\nDetail akan menampilkan cover, sinopsis, genre, rating, views, ukuran, dan link download.`;
+  const help = `Gunakan perintah berikut:\n/random → hentai acak\n/release → rilisan terbaru\n/search → cari hentai\nDetail akan menampilkan cover, sinopsis, genre, rating, views, ukuran, dan link download.`;
   bot.sendMessage(chatId, help, { parse_mode: 'HTML' });
 });
 
