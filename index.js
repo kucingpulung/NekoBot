@@ -46,7 +46,15 @@ const formatDetailedMetadata = (data) => {
     ? data.url.map((u, i) => `<a href="${u}">Episode ${i + 1}</a>`).join('\n')
     : (data.url || '');
 
-  return `<b>${escapeHtml(data.title)}</b>\n\n${fields}\n\n<b>Sinopsis:</b>\n${escapeHtml(data.synopsis)}\n\n<b>Ukuran File:</b>\n${escapeHtml(sizeInfo)}\n\n<b>Link Episode:</b>\n${urls}`;
+  const synopsis = data.synopsis ? escapeHtml(data.synopsis) : 'Tidak ada sinopsis.';
+
+  let caption = `<b>${escapeHtml(data.title)}</b>\n\n${fields}\n\n<b>Sinopsis:</b>\n${synopsis}\n\n<b>Ukuran File:</b>\n${escapeHtml(sizeInfo)}\n\n<b>Link Episode:</b>\n${urls}`;
+
+  if (caption.length > 1000) {
+    caption = caption.slice(0, 1000) + '...';
+  }
+
+  return caption;
 };
 
 const sendWithPhotoOrText = (chatId, imgUrl, caption, downloadLinks = {}) => {
@@ -61,7 +69,7 @@ const sendWithPhotoOrText = (chatId, imgUrl, caption, downloadLinks = {}) => {
       parse_mode: 'HTML',
       reply_markup: { inline_keyboard: buttons },
     }).catch(err => {
-      console.error('Gagal kirim foto:', err);
+      console.error('Gagal kirim foto, fallback ke text:', err.message);
       bot.sendMessage(chatId, caption, {
         parse_mode: 'HTML',
         reply_markup: { inline_keyboard: buttons },
@@ -83,7 +91,7 @@ bot.onText(/\/start/, (msg) => {
 
 bot.onText(/\/help/, (msg) => {
   const chatId = msg.chat.id;
-  const help = `Gunakan perintah berikut:\n/random → hentai acak\n/release → rilisan terbaru\n/search → cari hentai\nDetail akan menampilkan cover, sinopsis, genre, rating, views, ukuran, dan link download.`;
+  const help = `Gunakan perintah berikut:\n/random → hentai acak\n/release → rilisan terbaru\n/search <kata> → cari hentai\nDetail akan menampilkan cover, sinopsis, genre, rating, views, ukuran, dan link download.`;
   bot.sendMessage(chatId, help, { parse_mode: 'HTML' });
 });
 
@@ -94,7 +102,7 @@ bot.onText(/\/random/, async (msg) => {
     const caption = formatDetailedMetadata(data);
     sendWithPhotoOrText(chatId, data.img, caption, data.download);
   } catch (err) {
-    console.error(err);
+    console.error('Error random:', err.message);
     bot.sendMessage(chatId, 'Gagal mengambil data random.');
   }
 });
@@ -109,14 +117,16 @@ bot.onText(/\/release/, async (msg) => {
       sendWithPhotoOrText(chatId, meta.img, caption, meta.download);
     }
   } catch (err) {
-    console.error(err);
+    console.error('Error release:', err.message);
     bot.sendMessage(chatId, 'Gagal mengambil rilisan terbaru.');
   }
 });
 
 bot.onText(/\/search (.+)/, async (msg, match) => {
   const chatId = msg.chat.id;
-  const query = match[1];
+  const rawQuery = match[1];
+  const query = rawQuery.replace(/[<>]/g, ''); // escape user input
+
   try {
     const results = await nekobocc.search(query);
     if (results.length === 0) {
@@ -129,7 +139,7 @@ bot.onText(/\/search (.+)/, async (msg, match) => {
       sendWithPhotoOrText(chatId, meta.img, caption, meta.download);
     }
   } catch (err) {
-    console.error(err);
+    console.error('Error search:', err.message);
     bot.sendMessage(chatId, 'Gagal mencari data.');
   }
 });
