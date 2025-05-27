@@ -2,10 +2,10 @@
   "name": "nekobot",
   "version": "1.0.0",
   "description": "Telegram bot using nekobocc",
-  "main": "Index.js",
+  "main": "index.js",
   "type": "module",
   "scripts": {
-    "start": "node Index.js"
+    "start": "node index.js"
   },
   "dependencies": {
     "express": "^4.18.2",
